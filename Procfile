@@ -1,0 +1,1 @@
+web: sh setup.sh && streamlit run AES_app.py
