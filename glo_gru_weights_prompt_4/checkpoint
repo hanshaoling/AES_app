@@ -1,0 +1,2 @@
+model_checkpoint_path: "glo_gru_weights_prompt_4"
+all_model_checkpoint_paths: "glo_gru_weights_prompt_4"
