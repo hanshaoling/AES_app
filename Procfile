@@ -1,1 +1,1 @@
-web: sh setup.sh && streamlit run AES_app.py
+web: sh setup.sh && streamlit run AES_app.py --server.maxUploadSize=1024
