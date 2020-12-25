@@ -42,10 +42,6 @@ def get_binary_file_downloader_html(bin_file, file_label='File'):
 def get_model(prompt_id):
     model_path=f'glo_gru_prompt_{prompt_id}'
     return tf.keras.models.load_model(model_path)
-    
-with ZipFile('glo_gru_prompt_1.zip', 'r') as zipObj:
-   # Extract all the contents of zip file in current directory
-   zipObj.extractall()
 
 st.sidebar.title('Navigation')
 add_selectbox = st.sidebar.radio(
