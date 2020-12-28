@@ -17,7 +17,7 @@ import base64
 
 st.title("Automated Essay Scoring Web App")
 st.subheader('Shaoling Han | shaolinghan@hsph.harvard.edu')
-st.subheader('https://github.com/hanshaoling')
+st.subheader('https://github.com/hanshaoling/AES_app')
 
 # dict for essay prompts
 prompt_dict={1: "Effects computers have on people",
@@ -109,7 +109,7 @@ to grade one essay in order to produce a reliable score.
 Therefore, automated essay scoring (AES) systems can provide a potential mitigation to this problem. 
 If carefully developed, having a few essay questions is feasible for many test organizations 
 since the AES is able to score those essays in a fast and objective way. 
-Thus, the goal of our project is to build a model that predicts the essay scores that are consistent with human graders.
+Thus, the goal is to build a model that predicts the essay scores that are consistent with human graders.
             """
         )
         st.header('Dataset overview')
@@ -119,13 +119,24 @@ The dataset used to train this AES model is the [ASAP data](https://www.kaggle.c
 There are 8 essay prompts with over 12k essays in total and around 1500 essays for each prompt, except the 8th prompt. 
 These essays are written by students from Grade 7 to Grade 10. The prompts are either persuasive or source dependent, 
 and each prompt has its own scoring scale. More details for these prmopts are available in **Essay Grader** part.
-
-
             """
+        )
+        st.header('Model setting')
+        st.markdown(
+            """
+A recurrent neural network (RNN) with 1 layer of **Glove** word embedding (100-D) and 2 layers of **GRU** (64 & 32 units, respectively)
+is trained. **Sigmoid** activation for output is used to restrict the score within 0-1 range 
+and rescaled to the original scale depending on specific prompt.   
 
-
-
-
+To allow the model to tell difference of essays for different prompts, models are trained for each prompt separately. 
+For purpose of data augmentation, essays from **other prompts** are sampled and added to each training sets, with score labeled as 0.
+            """
+        )
+        st.header('Application')
+        st.markdown(
+            """
+Now let's go to the **Essay Grader** from the sidebar navigation and try our model! 
+            """
         )
 
     if add_selectbox == 'Essay Grader':
@@ -159,6 +170,16 @@ and each prompt has its own scoring scale. More details for these prmopts are av
             score=score.round(0).astype(int)
             st.markdown(f"The automatic score of this essay is {score}")
 
+    if add_selectbox == 'Acknowledgement':
+        st.header('Acknowledgement')
+        st.markdown(
+            """
+This app was produced as part of the final project for [Harvard’s AC295 Fall 2020](https://harvard-iacs.github.io/2020F-AC295/) course.   
+Thanks for team members **Duo Zhang, Erin Yang, Wenjie Gu**.   
+For more details about our project design, EDA, etc., 
+please refer to our previous [medium post](https://duozhang-75134.medium.com/automated-essay-grading-7bc6cb8ac0b5)
+            """
+        )
 
     
 if __name__ == '__main__':
