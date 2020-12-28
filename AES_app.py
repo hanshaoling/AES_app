@@ -1,6 +1,7 @@
 import streamlit as st
 import tensorflow as tf
 import numpy as np
+import pandas as pd
 from tensorflow import keras
 from tensorflow.keras.models import Model,Sequential
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
@@ -28,9 +29,14 @@ prompt_dict={1: "Effects computers have on people",
              7: "Patience",
              8: "Benefits of laughter"}
 
+# inverse dict for essay prompts
 prompt_inv_dict={}
 for key, value in prompt_dict.items():
     prompt_inv_dict[value]=key
+
+# dict for each prompt's scale
+low_scale={1:2,2:1,3:0,4:0,5:0,6:0,7:0,8:0}
+high_scale={1:12,2:6,3:3,4:3,5:4,6:4,7:30,8:60}
 
 def get_binary_file_downloader_html(bin_file, file_label='File'):
     with open(bin_file, 'rb') as f:
@@ -77,6 +83,12 @@ def get_model(path):
     model.load_weights(path)
     return model
 
+@st.cache
+def read_data():
+    data=pd.read_excel('training_set_rel3.xls')
+    data=data[['essay_set','essay']]
+    return data
+
 def main():
     st.sidebar.title('Navigation')
     add_selectbox = st.sidebar.radio(
@@ -85,24 +97,69 @@ def main():
         )
 
     if add_selectbox=='Introduction':
-        st.title('hello')
+        st.header('Introduction')
+        st.markdown(
+            """
+Unlike multiple choice questions in standardized tests that have clear right and wrong answers, 
+essays are a great way to measure academic performance by allowing students to share their thoughts on open-ended questions. 
+Essays promote diverse thinking and enable instructors to see how well students can think critically and apply the learned concepts in life. 
+However, it is hard to have many essay questions in an exam especially in national exams 
+since essays are time consuming for teachers to grade by hand as it usually requires several graders 
+to grade one essay in order to produce a reliable score. 
+Therefore, automated essay scoring (AES) systems can provide a potential mitigation to this problem. 
+If carefully developed, having a few essay questions is feasible for many test organizations 
+since the AES is able to score those essays in a fast and objective way. 
+Thus, the goal of our project is to build a model that predicts the essay scores that are consistent with human graders.
+            """
+        )
+        st.header('Dataset overview')
+        st.markdown(
+            """
+The dataset used to train this AES model is the [ASAP data](https://www.kaggle.com/c/asap-aes/data) from Kaggle. 
+There are 8 essay prompts with over 12k essays in total and around 1500 essays for each prompt, except the 8th prompt. 
+These essays are written by students from Grade 7 to Grade 10. The prompts are either persuasive or source dependent, 
+and each prompt has its own scoring scale. More details for these prmopts are available in **Essay Grader** part.
+
+
+            """
+
+
+
+
+        )
 
     if add_selectbox == 'Essay Grader':
         prompt=st.selectbox('Please select Essay prompt:', [prompt_dict[x] for x in range(1,9)])
         prompt_id=prompt_inv_dict[prompt]
         filename=f'Essay Set #{prompt_id}--ReadMeFirst.docx'
         st.markdown(get_binary_file_downloader_html(filename, 'essay prompt description doc'), unsafe_allow_html=True)
+        low=low_scale[prompt_id]
+        high=high_scale[prompt_id]
+        st.markdown(f"The score scale of this prompt is from {low} to {high}")
 
+        data=read_data()
+        data=data[data.essay_set==prompt_id]
+        
+        example=data.essay.sample(n=1).values[0]
+        
+        input_essay=st.text_area('Essay input', height=64) 
 
-        input_essay=st.text_area('Essay') # randomly select a "typical" essay as default?
-
-
-        if st.button('grading'):
-            weight_path=f'./glo_gru_weights_prompt_{prompt_id}/glo_gru_weights_prompt_{prompt_id}'
-            model=get_model(weight_path)
+        weight_path=f'./glo_gru_weights_prompt_{prompt_id}/glo_gru_weights_prompt_{prompt_id}'
+        model=get_model(weight_path)
+        if st.button('Grade this essay'):             
             score=model.predict([input_essay])[0][0]
-            st.write(score)
-            # rescale!
+            score=score*(high-low)+low
+            score=score.round(0).astype(int)
+            st.markdown(f"The automatic score of this essay is {score}")
+
+        if st.button('Try a random example of this prompt'):
+            input_essay=st.text_area('Essay input', example, height=64) 
+            score=model.predict([example])[0][0]
+            score=score*(high-low)+low
+            score=score.round(0).astype(int)
+            st.markdown(f"The automatic score of this essay is {score}")
+
+
     
 if __name__ == '__main__':
     main()
