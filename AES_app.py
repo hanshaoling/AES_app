@@ -7,8 +7,6 @@ from tensorflow.keras.models import Model,Sequential
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 from tensorflow.keras.layers import LSTM, Embedding, Dense, GRU, Input
 from tensorflow.keras import layers
-from tensorflow.keras import optimizers
-from zipfile import ZipFile
 import tempfile
 import time
 
