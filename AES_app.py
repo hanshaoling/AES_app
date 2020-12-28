@@ -65,7 +65,7 @@ def create_model():
 
     #model.summary()
     loss = tf.keras.losses.binary_crossentropy
-    optimizer = optimizers.RMSprop(learning_rate= 0.0006)
+    optimizer = tf.keras.optimizers.RMSprop(learning_rate= 0.0006)
     metrics=['mse']
     model.compile(loss= loss, optimizer = optimizer, metrics = metrics)
     return model
